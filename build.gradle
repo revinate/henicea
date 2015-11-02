@@ -1,0 +1,85 @@
+plugins {
+    id "com.jfrog.artifactory" version "3.1.1"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+    springVersion = '1.2.4.RELEASE'
+    cassandraVersion = '2.1.7.1'
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-actuator:${springVersion}"
+    compile "com.datastax.cassandra:cassandra-driver-core:$cassandraVersion"
+    compile "com.datastax.cassandra:cassandra-driver-dse:$cassandraVersion"
+    compile "com.datastax.cassandra:cassandra-driver-mapping:$cassandraVersion"
+    compile 'org.projectlombok:lombok:1.16.6'
+
+    testCompile "org.springframework.boot:spring-boot-starter-test:${springVersion}"
+    testCompile 'org.assertj:assertj-core:3.1.0'
+}
+
+group 'com.revinate'
+version = "1.0.${System.getenv().BUILD_NUMBER ?: "0-SNAPSHOT"}"
+
+jar {
+    baseName = 'henicea'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'henicea'
+
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://artifactory-px.ops.rpc.revinate.net/artifactory'
+    publish {
+        repository {
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_pass}"
+            maven = true
+        }
+        defaults {
+            publications ('mavenJava')
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+        }
+    }
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.6'
+}
