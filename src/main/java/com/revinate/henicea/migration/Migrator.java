@@ -5,7 +5,6 @@ import com.datastax.driver.core.Session;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,7 +15,6 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 
-@Component
 @Slf4j
 public class Migrator {
 

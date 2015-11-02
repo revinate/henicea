@@ -18,10 +18,12 @@ public class CassandraConfig {
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    private Migrator migrator;
-
-    @Autowired
     private Environment environment;
+
+    @Bean
+    public Migrator migrator() {
+        return new Migrator();
+    }
 
     @Bean
     public Cluster cluster() throws IOException {
@@ -31,7 +33,7 @@ public class CassandraConfig {
                 .build();
 
         log.info("Running migrations");
-        migrator.execute(cluster, environment.getProperty("cassandra.keyspace"), getMigrations());
+        migrator().execute(cluster, environment.getProperty("cassandra.keyspace"), getMigrations());
 
         return cluster;
     }
