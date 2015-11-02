@@ -49,7 +49,7 @@ public class CassandraConfig {
 
 ## Health check
 
-Hernicea provides a simple health check through Spring Boot Actuator. The only requirement
+Henicea provides a simple health check through Spring Boot Actuator. The only requirement
 is to have a Cassandra `Session` object in the Spring context.
 
 To auto configure a health check add
