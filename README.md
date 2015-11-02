@@ -1,6 +1,6 @@
 # Henicea
 
-Henicea was brother of Cassandra in the Greek Mythology.
+Henicea was the brother of Cassandra in the Greek Mythology.
 
 ## Migration
 
@@ -46,3 +46,17 @@ public class CassandraConfig {
     }
 }
 ```
+
+## Health check
+
+Hernicea provides a simple health check through Spring Boot Actuator. The only requirement
+is to have a Cassandra `Session` object in the Spring context.
+
+To auto configure a health check add
+```java
+    @Bean
+    public CassandraHealthIndicator cassandraHealthIndicator() {
+        return new CassandraHealthIndicator();
+    }
+```
+to your Java config class.
