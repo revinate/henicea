@@ -1,6 +1,6 @@
 # Henicea
 
-Henicea was the brother of Cassandra in the Greek Mythology.
+Henicea was the sister of Cassandra in the Greek Mythology.
 
 ## Migration
 
