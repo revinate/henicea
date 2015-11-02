@@ -47,6 +47,13 @@ public class CassandraConfig {
 }
 ```
 
+### Migration files
+
+The migration file can be named in any pattern. By default the files are sorted by name
+but the `resourceComparator` in the `Migrator` class has a setter to allow custom strategies.
+
+Due to limitations in the driver, each migration file can have only **one** statement.
+
 ## Health check
 
 Henicea provides a simple health check through Spring Boot Actuator. The only requirement
@@ -54,9 +61,9 @@ is to have a Cassandra `Session` object in the Spring context.
 
 To auto configure a health check add
 ```java
-    @Bean
-    public CassandraHealthIndicator cassandraHealthIndicator() {
-        return new CassandraHealthIndicator();
-    }
+@Bean
+public CassandraHealthIndicator cassandraHealthIndicator() {
+    return new CassandraHealthIndicator();
+}
 ```
 to your Java config class.
