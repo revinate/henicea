@@ -6,8 +6,9 @@ Henicea was the brother of Cassandra in the Greek Mythology.
 
 Henicea provides a simple migration mechanism for Java projects.
 
-Example config class for Spring Boot
+Example config class for Spring Boot:
 
+CassandraConfig.java
 ```java
 @Configuration
 @Slf4j
@@ -19,32 +20,38 @@ public class CassandraConfig {
     @Autowired
     private Migrator migrator;
 
+    @Autowired
+    private Environment environment;
+
     @Bean
     public Cluster cluster() throws IOException {
-        LetterConfig.CassandraConfig cassandraConfig = config.getCassandra();
-
-        log.info("Connecting to Cassandra using config {}", cassandraConfig);
-
         Cluster cluster = Cluster.builder()
-                .addContactPoints(cassandraConfig.getContactpoints().split(","))
-                .withPort(cassandraConfig.getPort())
+                .addContactPoints(environment.getProperty("cassandra.contactPoints").split(","))
+                .withPort(environment.getProperty("cassandra.port", Integer.class))
                 .build();
 
         log.info("Running migrations");
-        migrator.execute(cluster, cassandraConfig.getKeyspace(), getMigrations());
+        migrator.execute(cluster, environment.getProperty("cassandra.keyspace"), getMigrations());
 
         return cluster;
     }
 
     @Bean
     public Session session() throws Exception {
-        return cluster().connect(config.getCassandra().getKeyspace());
+        return cluster().connect(environment.getProperty("cassandra.keyspace"));
     }
 
     private Resource[] getMigrations() throws IOException {
         return resourceResolver.getResources("classpath:/cassandra/*.cql");
     }
 }
+```
+
+application.properties
+```
+cassandra.contactPoints=cassandra-node1,cassandra-node2
+cassandra.port=9042
+cassandra.keyspace=myapp
 ```
 
 ### Migration files
