@@ -15,8 +15,9 @@ import static java.util.stream.Collectors.toCollection;
 @Slf4j
 public class MigrationClient {
 
+    private static final String KEYSPACE_CREATION_STATEMENT =
+            "CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': %d}";
     private static final List<String> INIT_STATEMENTS = Arrays.asList(
-            "CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
             "CREATE TABLE IF NOT EXISTS %s.leases (name text PRIMARY KEY, owner text, value text) with default_time_to_live = 180",
             "CREATE TABLE IF NOT EXISTS %s.migrations (name text PRIMARY KEY, created_at timestamp, status text, statement text, reason text)"
     );
@@ -24,14 +25,21 @@ public class MigrationClient {
     private static final String LEASES_TABLE = "leases";
     private static final String MIGRATIONS_TABLE = "migrations";
     private static final String MIGRATION_LEASE_KEY = "migration";
+    private static final int DEFAULT_REPLICATION_FACTOR = 1;
 
     private enum MigrationStatus {APPLYING, APPLIED, FAILED}
 
     private final Session session;
     private final String keyspace;
     private final String uniqueId;
+    private final int replicationFactor;
+
+    public MigrationClient(Session session, String keyspace, String uniqueId) {
+        this(session, keyspace, uniqueId, DEFAULT_REPLICATION_FACTOR);
+    }
 
     public void init() {
+        session.execute(String.format(KEYSPACE_CREATION_STATEMENT, keyspace, replicationFactor));
         INIT_STATEMENTS.stream()
                 .map(s -> String.format(s, keyspace))
                 .forEach(session::execute);

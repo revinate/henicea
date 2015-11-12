@@ -52,6 +52,22 @@ public class MigrationClientTest {
     }
 
     @Test
+    public void init_shouldCreateBaseMigrationTablesWithCustomRf() throws Exception {
+        MigrationClient customRfClient = new MigrationClient(session, "test", "unit-test-runner", 2);
+        customRfClient.init();
+
+        ArgumentCaptor<String> statementCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session, atLeastOnce()).execute(statementCaptor.capture());
+        assertThat(statementCaptor.getAllValues())
+                .hasSize(3)
+                .containsSequence(
+                        "CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}",
+                        "CREATE TABLE IF NOT EXISTS test.leases (name text PRIMARY KEY, owner text, value text) with default_time_to_live = 180",
+                        "CREATE TABLE IF NOT EXISTS test.migrations (name text PRIMARY KEY, created_at timestamp, status text, statement text, reason text)"
+                );
+    }
+
+    @Test
     public void acquireLock_shouldReturnTrueIfInsertSucceeds() throws Exception {
         ResultSet leaseResultSet = mock(ResultSet.class);
 

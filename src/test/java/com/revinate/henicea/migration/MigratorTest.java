@@ -35,7 +35,17 @@ public class MigratorTest {
     @Before
     public void setUp() throws Exception {
         migrator = new Migrator();
-        migrator.setFactory((session, keyspace, uniqueClientId) -> client);
+        migrator.setFactory(new MigrationClientFactory() {
+            @Override
+            public MigrationClient newClient(Session session, String keyspace, String uniqueClientId) {
+                return client;
+            }
+
+            @Override
+            public MigrationClient newClient(Session session, String keyspace, String uniqueClientId, int replicationFactor) {
+                return client;
+            }
+        });
 
         when(cluster.connect()).thenReturn(session);
     }
@@ -45,6 +55,16 @@ public class MigratorTest {
         when(client.acquireLock()).thenReturn(false);
 
         migrator.execute(cluster, "test");
+
+        verify(client, times(1)).init();
+        verify(session, times(1)).close();
+    }
+
+    @Test
+    public void execute_shouldRunWithCustomRf() throws Exception {
+        when(client.acquireLock()).thenReturn(false);
+
+        migrator.execute(cluster, "test", 2);
 
         verify(client, times(1)).init();
         verify(session, times(1)).close();

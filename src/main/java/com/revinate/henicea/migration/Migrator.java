@@ -19,23 +19,35 @@ import static java.util.Comparator.comparing;
 public class Migrator {
 
     @Setter
-    private MigrationClientFactory factory = MigrationClient::new;
+    private MigrationClientFactory factory = new MigrationClientFactoryImpl();
 
     @Setter
     private Comparator<Resource> resourceComparator = comparing(Resource::getFilename);
 
     public void execute(Cluster cluster, String keyspace, Resource... resource) {
         try (Session session = cluster.connect()) {
-            MigrationClient client = factory.newClient(session, keyspace, getHostname().orElseGet(() -> UUID.randomUUID().toString()));
-
-            log.debug("Initializing cassandra schema");
-            client.init();
-
-            log.debug("Getting lease to apply migrations");
-            runWithLock(client, (appliedMigrations) -> parseMigrations(resource)
-                    .filter(wasAppliedWith(appliedMigrations).negate())
-                    .forEach(client::runMigration));
+            MigrationClient client = factory.newClient(session, keyspace,
+                    getHostname().orElseGet(() -> UUID.randomUUID().toString()));
+            doExecute(client, resource);
         }
+    }
+
+    public void execute(Cluster cluster, String keyspace, int replicationFactor, Resource... resource) {
+        try (Session session = cluster.connect()) {
+            MigrationClient client = factory.newClient(session, keyspace,
+                    getHostname().orElseGet(() -> UUID.randomUUID().toString()), replicationFactor);
+            doExecute(client, resource);
+        }
+    }
+
+    private void doExecute(MigrationClient client, Resource... resource) {
+        log.debug("Initializing cassandra schema");
+        client.init();
+
+        log.debug("Getting lease to apply migrations");
+        runWithLock(client, (appliedMigrations) -> parseMigrations(resource)
+                .filter(wasAppliedWith(appliedMigrations).negate())
+                .forEach(client::runMigration));
     }
 
     private Stream<Migration> parseMigrations(Resource... resource) {
