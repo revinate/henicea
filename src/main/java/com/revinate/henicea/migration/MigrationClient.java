@@ -32,14 +32,10 @@ public class MigrationClient {
     private final Session session;
     private final String keyspace;
     private final String uniqueId;
-    private final int replicationFactor;
 
-    public MigrationClient(Session session, String keyspace, String uniqueId) {
-        this(session, keyspace, uniqueId, DEFAULT_REPLICATION_FACTOR);
-    }
-
-    public void init() {
-        session.execute(String.format(KEYSPACE_CREATION_STATEMENT, keyspace, replicationFactor));
+    public void init(Optional<Integer> replicationFactor) {
+        session.execute(String.format(KEYSPACE_CREATION_STATEMENT, keyspace,
+                replicationFactor.orElse(DEFAULT_REPLICATION_FACTOR)));
         INIT_STATEMENTS.stream()
                 .map(s -> String.format(s, keyspace))
                 .forEach(session::execute);

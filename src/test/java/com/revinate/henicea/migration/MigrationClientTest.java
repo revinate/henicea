@@ -17,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
@@ -37,8 +38,8 @@ public class MigrationClientTest {
     }
 
     @Test
-    public void init_shouldCreateBaseMigrationTables() throws Exception {
-        client.init();
+    public void init_shouldCreateBaseMigrationTablesWithDefaultRf() throws Exception {
+        client.init(Optional.empty());
 
         ArgumentCaptor<String> statementCaptor = ArgumentCaptor.forClass(String.class);
         verify(session, atLeastOnce()).execute(statementCaptor.capture());
@@ -53,18 +54,13 @@ public class MigrationClientTest {
 
     @Test
     public void init_shouldCreateBaseMigrationTablesWithCustomRf() throws Exception {
-        MigrationClient customRfClient = new MigrationClient(session, "test", "unit-test-runner", 2);
-        customRfClient.init();
+        client.init(Optional.of(2));
 
         ArgumentCaptor<String> statementCaptor = ArgumentCaptor.forClass(String.class);
         verify(session, atLeastOnce()).execute(statementCaptor.capture());
         assertThat(statementCaptor.getAllValues())
                 .hasSize(3)
-                .containsSequence(
-                        "CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}",
-                        "CREATE TABLE IF NOT EXISTS test.leases (name text PRIMARY KEY, owner text, value text) with default_time_to_live = 180",
-                        "CREATE TABLE IF NOT EXISTS test.migrations (name text PRIMARY KEY, created_at timestamp, status text, statement text, reason text)"
-                );
+                .contains("CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}");
     }
 
     @Test

@@ -18,8 +18,10 @@ import static java.util.Comparator.comparing;
 @Slf4j
 public class Migrator {
 
+    private Optional<Integer> replicationFactor = Optional.empty();
+
     @Setter
-    private MigrationClientFactory factory = new MigrationClientFactoryImpl();
+    private MigrationClientFactory factory = MigrationClient::new;
 
     @Setter
     private Comparator<Resource> resourceComparator = comparing(Resource::getFilename);
@@ -28,26 +30,19 @@ public class Migrator {
         try (Session session = cluster.connect()) {
             MigrationClient client = factory.newClient(session, keyspace,
                     getHostname().orElseGet(() -> UUID.randomUUID().toString()));
-            doExecute(client, resource);
+
+            log.debug("Initializing cassandra schema");
+            client.init(replicationFactor);
+
+            log.debug("Getting lease to apply migrations");
+            runWithLock(client, (appliedMigrations) -> parseMigrations(resource)
+                    .filter(wasAppliedWith(appliedMigrations).negate())
+                    .forEach(client::runMigration));
         }
     }
 
-    public void execute(Cluster cluster, String keyspace, int replicationFactor, Resource... resource) {
-        try (Session session = cluster.connect()) {
-            MigrationClient client = factory.newClient(session, keyspace,
-                    getHostname().orElseGet(() -> UUID.randomUUID().toString()), replicationFactor);
-            doExecute(client, resource);
-        }
-    }
-
-    private void doExecute(MigrationClient client, Resource... resource) {
-        log.debug("Initializing cassandra schema");
-        client.init();
-
-        log.debug("Getting lease to apply migrations");
-        runWithLock(client, (appliedMigrations) -> parseMigrations(resource)
-                .filter(wasAppliedWith(appliedMigrations).negate())
-                .forEach(client::runMigration));
+    public void setReplicationFactor(Integer replicationFactor) {
+        this.replicationFactor = Optional.ofNullable(replicationFactor);
     }
 
     private Stream<Migration> parseMigrations(Resource... resource) {
