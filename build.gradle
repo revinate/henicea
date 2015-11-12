@@ -16,7 +16,6 @@ ext {
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator:${springVersion}"
     compile "com.datastax.cassandra:cassandra-driver-core:$cassandraVersion"
-    compile "com.datastax.cassandra:cassandra-driver-dse:$cassandraVersion"
     compile "com.datastax.cassandra:cassandra-driver-mapping:$cassandraVersion"
     compile 'org.projectlombok:lombok:1.16.6'
 
