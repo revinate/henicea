@@ -12,6 +12,9 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * Simple health indicator for Spring Boot actuator. It shows the servers and open connections.
+ */
 @Slf4j
 public class CassandraHealthIndicator extends AbstractHealthIndicator {
 
