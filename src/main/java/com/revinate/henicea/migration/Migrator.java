@@ -18,29 +18,29 @@ import static java.util.Comparator.comparing;
 /**
  * Main class to execute cassandra migrations. This class does not depend on any Spring bean or other Spring runtime
  * object.
- * <p>
- * You can instantiate at any point of the initialization process. The most convenient time to run the migration
+ *
+ * <p>You can instantiate at any point of the initialization process. The most convenient time to run the migration
  * is after the {@link Cluster} is instantiated and before the {@link Session} is created. You usually want to use the
  * session with some keyspace and therefore you want the keyspace to be created before it. This sample config works in
  * majority of setups:
- * <p>
+ *
  * <pre>
- * &#064Configuration
- * &#064Slf4j
+ * &#064;Configuration
+ * &#064;Slf4j
  * public class CassandraConfig {
  *
- *     &#064Autowired
+ *     &#064;Autowired
  *     private ResourcePatternResolver resourceResolver;
  *
- *     &#064Autowired
+ *     &#064;Autowired
  *     private Environment environment;
  *
- *     &#064Bean
+ *     &#064;Bean
  *     public Migrator migrator() {
  *         return new Migrator();
  *     }
  *
- *     &#064Bean
+ *     &#064;Bean
  *     public Cluster cluster() throws IOException {
  *         Cluster cluster = Cluster.builder()
  *                 .addContactPoints(environment.getProperty("cassandra.contactPoints").split(","))
@@ -53,7 +53,7 @@ import static java.util.Comparator.comparing;
  *         return cluster;
  *     }
  *
- *     &#064Bean
+ *     &#064;Bean
  *     public Session session() throws Exception {
  *         return cluster().connect(environment.getProperty("cassandra.keyspace"));
  *     }
@@ -63,8 +63,8 @@ import static java.util.Comparator.comparing;
  *     }
  * }
  * </pre>
- * <p>
- * The migration will create the keyspace with SimpleStrategy if the desired keyspace does not exists. This is very
+ *
+ * <p>The migration will create the keyspace with SimpleStrategy if the desired keyspace does not exists. This is very
  * useful for local development. If you are using Docker you do not need much more setup. For production you probably
  * want to have your keyspace created upfront with the right strategy, security and replication factory. Let this
  * library deal with tables and types only.
