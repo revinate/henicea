@@ -2,7 +2,6 @@ package com.revinate.henicea.migration;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -122,18 +121,16 @@ public class DefaultMigrationClient implements MigrationClient {
     }
 
     protected void addMigrationToTable(Migration migration) {
-        session.execute(
-                insertInto(keyspace, MIGRATIONS_TABLE)
-                        .value("name", migration.getName())
-                        .value("created_at", now())
-                        .value("status", MigrationStatus.APPLYING.name())
-                        .value("statement", migration.getStatement())
-                        .ifNotExists());
+        session.execute(insertInto(keyspace, MIGRATIONS_TABLE)
+                .value("name", migration.getName())
+                .value("created_at", now())
+                .value("status", MigrationStatus.APPLYING.name())
+                .value("statement", migration.getStatement())
+                .ifNotExists());
     }
 
     protected void updateMigrationStatus(Migration migration, String status, Optional<String> reason) {
-        session.execute(QueryBuilder
-                .update(keyspace, MIGRATIONS_TABLE)
+        session.execute(update(keyspace, MIGRATIONS_TABLE)
                 .with(set("status", status))
                 .and(set("reason", reason.orElse(null)))
                 .where(eq("name", migration.getName()))
@@ -141,6 +138,6 @@ public class DefaultMigrationClient implements MigrationClient {
     }
 
     protected static Object now() {
-        return QueryBuilder.raw("dateOf(now())");
+        return raw("dateOf(now())");
     }
 }
