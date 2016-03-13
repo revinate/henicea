@@ -18,7 +18,7 @@ public class Migration {
     private final String name;
     private final String statement;
 
-    static Optional<Migration> fromResource(Resource resource) {
+    public static Optional<Migration> fromResource(Resource resource) {
         try {
             String statement = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
             return Optional.of(new Migration(resource.getFilename(), statement));

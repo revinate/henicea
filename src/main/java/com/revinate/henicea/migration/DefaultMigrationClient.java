@@ -38,7 +38,6 @@ public class DefaultMigrationClient implements MigrationClient {
     protected final String uniqueId;
 
     /**
-     *
      * @param replicationFactor The optional replication factor when creating keyspace.
      */
     @Override
@@ -59,8 +58,7 @@ public class DefaultMigrationClient implements MigrationClient {
     @Override
     public boolean acquireLock() {
         log.debug("Trying to acquire migration lock");
-        ResultSet resultSet = session.execute(QueryBuilder
-                .insertInto(keyspace, LEASES_TABLE)
+        ResultSet resultSet = session.execute(insertInto(keyspace, LEASES_TABLE)
                 .value("name", MIGRATION_LEASE_KEY)
                 .value("owner", uniqueId)
                 .ifNotExists());
@@ -76,8 +74,7 @@ public class DefaultMigrationClient implements MigrationClient {
     @Override
     public void releaseLock() {
         log.debug("Releasing migration lock");
-        session.execute(QueryBuilder
-                .delete()
+        session.execute(delete()
                 .from(keyspace, LEASES_TABLE)
                 .where(eq("name", MIGRATION_LEASE_KEY))
                 .onlyIf(eq("owner", uniqueId)));
@@ -90,10 +87,7 @@ public class DefaultMigrationClient implements MigrationClient {
      */
     @Override
     public SortedSet<String> getAppliedMigrations() {
-        return session.execute(
-                QueryBuilder
-                        .select("name", "status")
-                        .from(keyspace, MIGRATIONS_TABLE))
+        return session.execute(select("name", "status").from(keyspace, MIGRATIONS_TABLE))
                 .all()
                 .stream()
                 .filter(row -> MigrationStatus.APPLIED.name().equals(row.getString(1)))
@@ -128,13 +122,13 @@ public class DefaultMigrationClient implements MigrationClient {
     }
 
     protected void addMigrationToTable(Migration migration) {
-        session.execute(QueryBuilder
-                .insertInto(keyspace, MIGRATIONS_TABLE)
-                .value("name", migration.getName())
-                .value("created_at", now())
-                .value("status", MigrationStatus.APPLYING.name())
-                .value("statement", migration.getStatement())
-                .ifNotExists());
+        session.execute(
+                insertInto(keyspace, MIGRATIONS_TABLE)
+                        .value("name", migration.getName())
+                        .value("created_at", now())
+                        .value("status", MigrationStatus.APPLYING.name())
+                        .value("statement", migration.getStatement())
+                        .ifNotExists());
     }
 
     protected void updateMigrationStatus(Migration migration, String status, Optional<String> reason) {
