@@ -1,4 +1,5 @@
 # Henicea
+[![Build Status](https://travis-ci.org/revinate/henicea.svg?branch=master)](https://travis-ci.org/revinate/henicea)
 
 Henicea was the sister of Cassandra in the Greek Mythology.
 
