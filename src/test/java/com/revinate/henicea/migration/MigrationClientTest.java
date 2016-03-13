@@ -34,7 +34,7 @@ public class MigrationClientTest {
 
     @Before
     public void setUp() throws Exception {
-        client = new MigrationClient(session, "test", "unit-test-runner");
+        client = new DefaultMigrationClient(session, "test", "unit-test-runner");
     }
 
     @Test

@@ -75,7 +75,7 @@ public class Migrator {
     private Optional<Integer> replicationFactor = Optional.empty();
 
     @Setter
-    private MigrationClientFactory factory = MigrationClient::new;
+    private MigrationClientFactory factory = DefaultMigrationClient::new;
 
     /**
      * By default the migrations are sorted by filename. This is a simplistic pattern but it does not scale. Instead of
