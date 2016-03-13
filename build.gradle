@@ -1,10 +1,7 @@
-plugins {
-    id "com.jfrog.artifactory" version "3.1.1"
-}
-
 apply plugin: 'java'
 apply plugin: 'jacoco'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -24,48 +21,15 @@ dependencies {
 }
 
 group 'com.revinate'
-version = "1.1.${System.getenv().BUILD_NUMBER ?: "0-SNAPSHOT"}"
+archivesBaseName = 'henicea'
+version = '1.0.0-SNAPSHOT'
 
 jar {
     baseName = 'henicea'
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = 'henicea'
-
-            from components.java
-
-            artifact sourceJar {
-                classifier "sources"
-            }
-        }
-    }
-}
-
-artifactory {
-    contextUrl = 'http://artifactory-px.ops.rpc.revinate.net/artifactory'
-    publish {
-        repository {
-            repoKey = 'libs-snapshot-local'
-            username = "${artifactory_user}"
-            password = "${artifactory_pass}"
-            maven = true
-        }
-        defaults {
-            publications ('mavenJava')
-        }
-    }
-    resolve {
-        repository {
-            repoKey = 'libs-release'
-        }
-    }
+repositories {
+    mavenCentral()
 }
 
 test {
@@ -82,6 +46,73 @@ test {
 jacocoTestReport {
     reports {
         xml.enabled true
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+signing {
+    required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.env.SONATYPE_USER, password: System.env.SONATYPE_PASS)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: System.env.SONATYPE_USER, password: System.env.SONATYPE_PASS)
+            }
+
+            pom.project {
+                name 'Cassandra migration library'
+                packaging 'jar'
+                artifactId 'henicea'
+                description 'Cassandra migrations for spring-boot apps'
+                url 'https://github.com/revinate/henicea'
+
+                scm {
+                    connection 'scm:git:git://github.com/revinate/henicea.git'
+                    developerConnection 'scm:git:ssh://git@github.com:revinate/henicea.git'
+                    url 'https://github.com/revinate/henicea'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'revinate'
+                        name 'Revinate, Inc'
+                    }
+                }
+            }
+        }
     }
 }
 
