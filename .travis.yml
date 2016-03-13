@@ -1,0 +1,13 @@
+language: java
+script: ./gradlew build jacocoTR
+
+sudo: false
+
+jdk:
+  - oraclejdk8
+
+before_install:
+  - pip install --user codecov
+
+after_success:
+  - codecov
