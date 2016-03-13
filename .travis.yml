@@ -1,12 +1,21 @@
 language: java
-script: ./gradlew build jacocoTR
+script: ./gradlew build jacocoTR uploadArchives
 
 sudo: false
 
 jdk:
   - oraclejdk8
 
+env:
+  global:
+    - secure: "YVlQnndIXgKOHvQpACgUFeliNbxYe8WT/lz6m5qZ2E70csQS7xuZdHHkgEF8xXhN3F10fFmDnXyN4Kf5g+JDPJ+OCXRdAGAkrJZRy7ER5VPnNqoTgOnkjnyMXRgL7QNq3DGpFkBlBGAEHxTFJH2lWVFZzOIJuQtZo+/NSInsurv0qsav7Vz1H2kxbNyrfGqcP1BcuugaS+uyAMZqr/Otird4PG5ZO5NE6E9tpZ7059io48hcthaC6zjPinR7jHrSPJTjPKYyRVxi4Gy86r3qdwU2UBxBkf6wnYD0PfSVcopF4nlgPy7gDRLu5ul+GmP30ZBwMLL+cfZIz4EOv/3fEEzxWmkIJUynUO6InrLpfWgF+NWyrCLWV/GzvDwMOJ0r+OAWi4luLuBWk1jzDZjVnkJ6NajPZESROQbvUZ9/ZU7mQ04UDi0bOkR5GEdlpodWeNYlFcJMzV0tvbL4kSNEqcQNVVgx/RstYRvMRVewrt59BpIXD2+XVuKmj7DYOLtP7ZWB/KbZTGrG4CZAsTKPZXqD5FeGwQiWaaNCEQQAcK/aYkJ2/f9VBZ4d/DGRdYyXfmVGLcB0e/gHn2v+l/hhsw6+btannHb+a/P0oywA2dsOshLE17hKjqB4DTd6YN83nLWOMr5v3ZFCZ881cbxehcWA+/FLDA8MS0DA+nfQ1gM="
+    - secure: "BZuxhTsXr6c8iAfx3kGvnz0bxpW3+uzejHlyg84Ggw2NneCcBxMcAKhsfzk1viO+YBCFjADQt04J+C73hVCNYZuuPtDGhz1UAq7KRtiu/uX7tn9VEvbMuJwB8FNYkApF4r4XM6YCXtxe7ZspS/b0rGvlONjBLOniPJ5yl04ZFOfLxRPrsfBMqrN/tm9UVPZKXUPU3MiHnHaB8g3PS1i2W28kCRge7hRNMgkZagZCCVujeLIc3iahY1HClfffG/i+AQjIjdU0xboTulsXPimHk9JbiVmq8vPjfKsNTOMQ8y7Lj1zNM+AbHfThnIJkGJQcvv6xwTlkdMFdTbDDvqkGEW3yxy/R9p4nuAOr+aeT1g7BDJwGB8ulPmde/VU0IbwP/QY5gMFQjkP69pOm+5+7dpeLQ87xcMYMlnxf6nbNzjWYVUCTjNO+KdH0AuA6QXA1nRniw2E5UyBn2i6Ikg5dcGiNEjCI0pUtpq5HRM8haj+SdeHY0zELBEtSciezDZqyVJYvsGXpKFlpEaLm1b8QY7/5oVbhn59D9JZvO/1BxPImeay44ARmPLegIdRSlYOuK4V9TADT0wD9IuMN9KPRrFOUspOkwfzaXWuYyB8pzkJx8T6WyiATfPBiOP+FkyIcvzSLsFatFXQlvtRi1CHiHipRWC5HEDzpIKTfO7RIIvY="
+
 before_install:
+  - openssl aes-256-cbc -pass pass:$SONATYPE_PASS -in deploy/secring.gpg.enc -out deploy/secring.gpg -d
+  - openssl aes-256-cbc -pass pass:$SONATYPE_PASS -in deploy/pubring.gpg.enc -out deploy/pubring.gpg -d
+  - mkdir -p ~/.gradle
+  - openssl aes-256-cbc -pass pass:$SONATYPE_PASS -in deploy/gradle.properties.enc -out ~/.gradle/gradle.properties -d
   - pip install --user codecov
 
 after_success:
