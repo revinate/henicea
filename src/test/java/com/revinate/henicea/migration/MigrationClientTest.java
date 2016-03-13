@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.atIndex;
 import static org.assertj.core.api.Fail.fail;
-import static org.assertj.core.api.StrictAssertions.atIndex;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

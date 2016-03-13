@@ -11,17 +11,16 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 ext {
     springVersion = '1.2.4.RELEASE'
-    cassandraVersion = '2.1.7.1'
+    cassandraVersion = '3.0.0'
 }
 
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator:${springVersion}"
     compile "com.datastax.cassandra:cassandra-driver-core:$cassandraVersion"
-    compile "com.datastax.cassandra:cassandra-driver-mapping:$cassandraVersion"
-    compile 'org.projectlombok:lombok:1.16.6'
+    compile 'org.projectlombok:lombok:1.16.8'
 
     testCompile "org.springframework.boot:spring-boot-starter-test:${springVersion}"
-    testCompile 'org.assertj:assertj-core:3.1.0'
+    testCompile 'org.assertj:assertj-core:3.2.0'
 }
 
 group 'com.revinate'

@@ -3,7 +3,6 @@ package com.revinate.henicea.spring.actuator;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Session;
 import com.google.common.collect.ImmutableMap;
-import org.assertj.core.api.StrictAssertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +43,8 @@ public class CassandraHealthIndicatorTest {
 
         Health health = indicator.health();
 
-        StrictAssertions.assertThat(health).isNotNull();
-        StrictAssertions.assertThat(health.getStatus()).isEqualTo(Status.UP);
+        assertThat(health).isNotNull();
+        assertThat(health.getStatus()).isEqualTo(Status.UP);
         assertThat(health.getDetails())
                 .contains(entry("openConnections", 2))
                 .contains(entry("servers", ImmutableMap.of("server", "UP")));
@@ -58,8 +57,8 @@ public class CassandraHealthIndicatorTest {
 
         Health health = indicator.health();
 
-        StrictAssertions.assertThat(health).isNotNull();
-        StrictAssertions.assertThat(health.getStatus()).isEqualTo(Status.DOWN);
+        assertThat(health).isNotNull();
+        assertThat(health.getStatus()).isEqualTo(Status.DOWN);
         assertThat(health.getDetails())
                 .contains(entry("openConnections", 0))
                 .contains(entry("servers", ImmutableMap.of("server", "DOWN")));
