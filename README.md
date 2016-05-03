@@ -68,6 +68,31 @@ but the `resourceComparator` in the `Migrator` class has a setter to allow custo
 
 Due to limitations in the driver, each migration file can have only **one** statement.
 
+## Waiting for Cassandra to start
+
+This is a common situation when you use Docker for local development and functional tests,
+the Cassandra database will start in a separate container and it may take longer to get ready
+than your application. This library comes with a simple utility to help with retry and
+exponential back-off.
+
+```java
+Cluster cluster = new Retryer()
+        .onError((attempt, exception) -> log.warn("Could not connect to cassandra cluster on attempt number {}. Wrapped exception", attempt, exception))
+        .withWait(TimeUnit.SECONDS, 1, 2, 4, 8, 10, 10)
+        .run(() -> {
+            Cluster candidate = Cluster.builder()
+                    .addContactPoints("localhost")
+                    .withPort(9042)
+                    .build();
+
+            candidate.init(); // will throw exception if none of the contact points can be reached
+
+            return candidate;
+        });
+```
+
+The `run` method will throw the last thrown exception if all the attempts failed.
+
 ## Health check
 
 Henicea provides a simple health check through Spring Boot Actuator. The only requirement
