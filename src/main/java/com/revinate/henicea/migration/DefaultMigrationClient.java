@@ -20,6 +20,7 @@ public class DefaultMigrationClient implements MigrationClient {
 
     private static final String KEYSPACE_CREATION_STATEMENT =
             "CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': %d}";
+    private static final String KEYSPACE_USE_STATEMENT = "USE %s";
     private static final List<String> INIT_STATEMENTS = Arrays.asList(
             "CREATE TABLE IF NOT EXISTS %s.leases (name text PRIMARY KEY, owner text, value text) with default_time_to_live = 180",
             "CREATE TABLE IF NOT EXISTS %s.migrations (name text PRIMARY KEY, created_at timestamp, status text, statement text, reason text)"
@@ -43,6 +44,7 @@ public class DefaultMigrationClient implements MigrationClient {
     public void init(Optional<Integer> replicationFactor) {
         session.execute(String.format(KEYSPACE_CREATION_STATEMENT, keyspace,
                 replicationFactor.orElse(DEFAULT_REPLICATION_FACTOR)));
+        session.execute(String.format(KEYSPACE_USE_STATEMENT, keyspace));
         INIT_STATEMENTS.stream()
                 .map(s -> String.format(s, keyspace))
                 .forEach(session::execute);

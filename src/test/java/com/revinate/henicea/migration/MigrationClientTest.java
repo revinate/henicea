@@ -44,9 +44,10 @@ public class MigrationClientTest {
         ArgumentCaptor<String> statementCaptor = ArgumentCaptor.forClass(String.class);
         verify(session, atLeastOnce()).execute(statementCaptor.capture());
         assertThat(statementCaptor.getAllValues())
-                .hasSize(3)
+                .hasSize(4)
                 .containsSequence(
                         "CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}",
+                        "USE test",
                         "CREATE TABLE IF NOT EXISTS test.leases (name text PRIMARY KEY, owner text, value text) with default_time_to_live = 180",
                         "CREATE TABLE IF NOT EXISTS test.migrations (name text PRIMARY KEY, created_at timestamp, status text, statement text, reason text)"
                 );
@@ -59,7 +60,7 @@ public class MigrationClientTest {
         ArgumentCaptor<String> statementCaptor = ArgumentCaptor.forClass(String.class);
         verify(session, atLeastOnce()).execute(statementCaptor.capture());
         assertThat(statementCaptor.getAllValues())
-                .hasSize(3)
+                .hasSize(4)
                 .contains("CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2}");
     }
 
