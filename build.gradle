@@ -14,7 +14,7 @@ ext {
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator:${springVersion}"
     compile "com.datastax.cassandra:cassandra-driver-core:$cassandraVersion"
-    compile 'org.projectlombok:lombok:1.16.8'
+    compileOnly 'org.projectlombok:lombok:1.16.8'
 
     testCompile "org.springframework.boot:spring-boot-starter-test:${springVersion}"
     testCompile 'org.assertj:assertj-core:3.2.0'
@@ -22,7 +22,7 @@ dependencies {
 
 group 'com.revinate'
 archivesBaseName = 'henicea'
-version = '1.1.0'
+version = '1.1.1-SNAPSHOT'
 
 jar {
     baseName = 'henicea'
