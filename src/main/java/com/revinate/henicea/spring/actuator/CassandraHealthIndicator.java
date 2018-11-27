@@ -1,6 +1,5 @@
 package com.revinate.henicea.spring.actuator;
 
-import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +7,8 @@ import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Simple health indicator for Spring Boot actuator. It shows the servers and open connections.
@@ -36,7 +34,13 @@ public class CassandraHealthIndicator extends AbstractHealthIndicator {
     }
 
     private Map<String, String> getHostStatus() {
-        return session.getState().getConnectedHosts().stream()
-                .collect(toMap(host -> host.getAddress().getHostName(), Host::getState));
+        Map<String, String> statusMap = new HashMap<>();
+
+        // use a local map obj instead of collect to allow address collisions
+        // it can happen if the contact point is an A record
+        session.getState().getConnectedHosts()
+                .forEach(host -> statusMap.put(host.getAddress().getHostName(), host.getState()));
+
+        return statusMap;
     }
 }
